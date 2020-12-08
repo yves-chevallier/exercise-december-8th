@@ -31,14 +31,14 @@ void fill(float array[], size_t size) {
     }
 }
 
-float min(float array[], size_t size) {
+float min(const float array[], size_t size) {
     float min = FLT_MAX;
     for (int i = 0; i < size; i++)
         if (array[i] < min) min = array[i];
     return min;
 }
 
-float max(float array[], size_t size) {
+float max(const float array[], size_t size) {
     float max = FLT_MIN;
     for (int i = 0; i < size; i++)
         if (array[i] > max) max = array[i];
@@ -53,9 +53,43 @@ void normalize(float array[], size_t size) {
     }
 }
 
-void display(float array[], size_t size) {
+void display(const float array[], size_t size) {
     for (int i = 0; i < size; i++) {
         printf("array[%d] = %f\n", i, array[i]);
+    }
+}
+
+void display_minmax(const float array[], size_t size) {
+    printf("max = %f\n", max(array, size));
+    printf("min = %f\n", min(array, size));
+}
+
+void hist(const float array[], size_t size, int bins) {
+    int histogram[64] = {0};
+    const size_t hsize = sizeof(histogram) / sizeof(histogram[0]);
+    if (bins > hsize) abort();
+
+    // Compute histogram
+    float max_value = max(array, size);
+    float min_value = min(array, size);
+    float bin_range = (max_value - min_value) / bins;
+    for (int i = 0; i < size; i++) {
+        for (int bin = 0; bin < bins; bin++) {
+            float s = min_value + bin * bin_range;
+            float e = min_value + (bin + 1) * bin_range;
+            if (array[i] > s && array[i] <= e)
+                histogram[bin]++;
+        }
+    }
+
+    // Display Histogram
+    printf("Histogram:\n");
+    for (int i = 0; i < bins; i++) {
+        printf("%3d. ", i + 1);
+        for (int k = 0; k < histogram[i]; k++) {
+            printf("*");
+        }
+        printf("\n");
     }
 }
 
@@ -65,11 +99,22 @@ int main(int argc, char *argv[]) {
 
     // Initialize array
     float array[128] = {0};
-    const int size = sizeof(array) / sizeof(array[0]);
+    const size_t size = sizeof(array) / sizeof(array[0]);
 
     fill(array, size);
+    display(array, size);
+    display_minmax(array, size);
+
     normalize(array, size);
     display(array, size);
-    printf("max = %f\n", max(array, size));
-    printf("min = %f\n", min(array, size));
+    display_minmax(array, size);
+
+    hist(array, size, 6);
 }
+
+
+
+// -> Fonction elle retourne plus qu'une variable
+// Ax^2 + Bx + C
+// void polyfit2(int array[], size_t size, float *a, float *b, float *c);
+
